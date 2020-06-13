@@ -13,6 +13,7 @@ class AllChars extends React.Component {
     super(props);
     this.state = {
       chars: [],
+      normChars: {byId:{}, listIds: []},
       filteredChars: [],
       id: '5ec26309e880d824b803c6b3',
       active: 'charInfo',
@@ -32,9 +33,14 @@ class AllChars extends React.Component {
 
   getData = async () => {
     const cha = await fetch('/api/chars', setHeaders()).then(response => response.json());
+    var byId = cha.reduce((acc, c) => {
+      acc[c._id] = c;
+      return acc
+     }, {}  )
 
     this.addClassesToFiletrs(cha);
-    this.setState({ chars: cha, filteredChars: cha });
+
+    this.setState({ chars: cha, filteredChars: cha, normChars: {byId, listIds: Object.keys(byId)} });
   };
 
   componentDidMount() {
@@ -120,6 +126,7 @@ class AllChars extends React.Component {
   }
 
   render() {
+    const { normChars, id} = this.state;
     return (
       <>
         <div className="chars">
@@ -142,7 +149,7 @@ class AllChars extends React.Component {
             <Menu callbackFromParent={this.getInfoFromMenu} changeCalcVisibility={this.changeCalcVisibility} />
           </div>
           <div className="charInfo">
-            {this.state.active === 'charInfo' && <CharInfo id={this.state.id} />}
+            {this.state.active === 'charInfo' && <CharInfo charInfo={normChars.byId[id]} />}
             {this.state.active === 'filters' && <CharFilter key={this.state.rmdKey} callbackFromParent={this.getCharFilters} />}
             {this.state.active === 'skillFilters' && <SkillFilter key={this.state.rmdKey} callbackFromParent={this.getSkillFilters} />}
           </div>
