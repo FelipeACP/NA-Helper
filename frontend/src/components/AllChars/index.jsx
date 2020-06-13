@@ -12,8 +12,7 @@ class AllChars extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      chars: [],
-      normChars: {byId:{}, listIds: []},
+      chars: {byId:{}, listIds: []},
       filteredChars: [],
       id: '5ec26309e880d824b803c6b3',
       active: 'charInfo',
@@ -37,10 +36,11 @@ class AllChars extends React.Component {
       acc[c._id] = c;
       return acc
      }, {}  )
+    var listIds = Object.keys(byId);
 
     this.addClassesToFiletrs(cha);
 
-    this.setState({ chars: cha, filteredChars: cha, normChars: {byId, listIds: Object.keys(byId)} });
+    this.setState({ chars: {byId, listIds }, filteredChars: listIds });
   };
 
   componentDidMount() {
@@ -88,14 +88,14 @@ class AllChars extends React.Component {
   getInfoFromMenu(whatIsActive) {
     this.setState({
       active: whatIsActive,
-      filteredChars: this.state.chars,
+      filteredChars: this.state.chars.listIds,
       rmdKey: Math.floor(Math.random() * 99999).toString()
     });
   }
 
   getSearchResult(term) {
-     const filterChars = this.state.chars.filter(char => {
-      if (char.name.toLowerCase().includes(term.toLowerCase())) 
+     const filterChars = this.state.chars.listIds.filter(id => {
+      if (this.state.chars.byId[id].name.toLowerCase().includes(term.toLowerCase())) 
         return true;
       return false;
     });
@@ -103,19 +103,19 @@ class AllChars extends React.Component {
   }
 
   getSkillFilters(includeAbilities, excludeAbilities) {
-    const filterChars = this.state.chars.filter(
-      character =>
-        includeAbilities.every(ability => character.skillFilter.includes(ability)) &&
-        excludeAbilities.every(ability => !character.skillFilter.includes(ability)),
+    const { chars } = this.state;
+    const filterChars = chars.listIds.filter(id =>
+        includeAbilities.every(ability => chars.byId[id].skillFilter.includes(ability)) &&
+        excludeAbilities.every(ability => !chars.byId[id].skillFilter.includes(ability)),
     );
     this.setState({ filteredChars: filterChars });
   }
 
   getCharFilters(includeFilters, excludeFilters) {
-    const filterChars = this.state.chars.filter(
-      character =>
-        includeFilters.every(filter => character.charFilter.includes(filter)) &&
-        excludeFilters.every(filter => !character.charFilter.includes(filter)),
+    const { chars } = this.state;
+    const filterChars = chars.listId.filter(id =>
+        includeFilters.every(filter => chars.byId[id].charFilter.includes(filter)) &&
+        excludeFilters.every(filter => !chars.byId[id].charFilter.includes(filter)),
     );
     this.setState({ filteredChars: filterChars });
   }
@@ -126,17 +126,17 @@ class AllChars extends React.Component {
   }
 
   render() {
-    const { normChars, id} = this.state;
+    const { chars, id, filteredChars } = this.state;
     return (
       <>
         <div className="chars">
-          {this.state.filteredChars.map(x => (
+          {filteredChars.map(id => (
             <img
               onClick={this.handleAvatarClick}
-              key={x._id}
-              alt={x.name}
-              src={x.avatar}
-              id={x._id}
+              key={id}
+              alt={chars.byId[id].name}
+              src={chars.byId[id].avatar}
+              id={id}
               className="facepic"
             />
           ))}
@@ -149,7 +149,7 @@ class AllChars extends React.Component {
             <Menu callbackFromParent={this.getInfoFromMenu} changeCalcVisibility={this.changeCalcVisibility} />
           </div>
           <div className="charInfo">
-            {this.state.active === 'charInfo' && <CharInfo charInfo={normChars.byId[id]} />}
+            {this.state.active === 'charInfo' && <CharInfo charInfo={chars.byId[id]} />}
             {this.state.active === 'filters' && <CharFilter key={this.state.rmdKey} callbackFromParent={this.getCharFilters} />}
             {this.state.active === 'skillFilters' && <SkillFilter key={this.state.rmdKey} callbackFromParent={this.getSkillFilters} />}
           </div>
