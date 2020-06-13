@@ -18,6 +18,14 @@ class CharInfo extends React.Component {
     this.handleAlternate = this.handleAlternate.bind(this);
     this.handleMission = this.handleMission.bind(this);
   }
+  componentDidMount(){
+    if(this.props.charInfo)
+      this.handleAvatarClick()
+  }
+  componentDidUpdate(prevProps){
+    if(this.props.charInfo?._id !== prevProps.charInfo?._id)
+      this.handleAvatarClick()
+  }
 
   handleSkillClick(e) {
     const { charInfo } = this.props;
@@ -80,6 +88,7 @@ class CharInfo extends React.Component {
         <div className="avatarAndChakra">
           <img
             className="avatar"
+            onClick={this.handleAvatarClick}
             alt="avatar"
             name={charInfo.name}
             desc={charInfo.description}
@@ -137,7 +146,7 @@ class CharInfo extends React.Component {
         />
       </div>
         :
-        <div class="loading">
+        <div className="loading">
           <p>Loading...</p>
         </div>
     );
